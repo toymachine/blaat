@@ -1,5 +1,6 @@
 (ns blaat.handler
   (:require [blaat.tmpl :as tmpl]
+            [blaat.cache :as cache]
             [ring.util.response :as ring-response]
             [clojure.tools.logging :as log]
             [formative.core :as f]

@@ -1,6 +1,8 @@
 (ns blaat.app
   (:require [blaat.handler :as handler]
-            [blaat.model :as model])
+            [blaat.model :as model]
+            [blaat.cache :as cache]
+            [clojurewerkz.spyglass.client :as c])
   (:use [net.cgrand.moustache]
         [ring.middleware.resource]
         [ring.middleware.file-info]
@@ -17,9 +19,16 @@
 (def development?
   (not production?))
 
+(def memcached-client (c/bin-connection "localhost:11211"))
+
+(defn wrap-setup [app]
+  (fn [req]
+    (binding [cache/*client* memcached-client]
+      (app req))))
 
 (def blaat-app
     (app
+       (wrap-setup)
        (wrap-stacktrace)
        (wrap-resource "public")
        (wrap-file-info)
