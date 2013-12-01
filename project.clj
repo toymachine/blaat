@@ -9,7 +9,8 @@
          [com.datomic/datomic-free "0.8.3561"]
 				 [net.cgrand/moustache "1.2.0-alpha2"]
 				 [lib-noir "0.7.6"]
-				 [criterium "0.4.2"]]
+				 [criterium "0.4.2"]
+         [com.cemerick/friend "0.2.0"]]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler blaat.app/blaat-app}
   :main blaat.core)

@@ -20,11 +20,11 @@
 
 (defn add-person-attribute []
   (d/transact (conn) [{:db/id (d/tempid :db.part/db)
-                     :db/ident :person/name
-                     :db/valueType :db.type/string
-                     :db/cardinality :db.cardinality/one
-                     :db/doc "A person's name"
-                     :db.install/_attribute :db.part/db}]))
+                       :db/ident :person/name
+                       :db/valueType :db.type/string
+                       :db/cardinality :db.cardinality/one
+                       :db/doc "A person's name"
+                       :db.install/_attribute :db.part/db}]))
 
 (defn add-a-person [name]
   (d/transact (conn) [{:db/id (d/tempid :db.part/user) :person/name name}]))
