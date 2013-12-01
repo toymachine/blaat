@@ -1,6 +1,7 @@
 (ns blaat.handler
   (:require [blaat.tmpl :as tmpl]
             [blaat.cache :as cache]
+            [blaat.util :as util]
             [ring.util.response :as ring-response]
             [clojure.tools.logging :as log]
             [formative.core :as f]
@@ -13,6 +14,11 @@
   {:status status
    :headers {"Content-type" "text/html"}
    :body body})
+
+(defn flash [response data]
+  (let [flash-id (util/rand-string 16)]
+    (cache/set! flash-id data)
+    (assoc response :flash flash-id)))
 
 (defn redirect [url]
   (ring-response/redirect (dyn-url url)))
@@ -35,13 +41,15 @@
 
 
 (defn login [request]
+  (if-let [flash-id (:flash request)]
+    (prn (cache/get flash-id)))
   (response
     :body (tmpl/main :title "Login" :content (f/render-form (login-form)))))
 
 (defn login-action [request]
   (prn (:params request))
    (-> (redirect "/login")
-       (assoc :flash (_t "Wrong username or password"))))
+       (flash {:form "aap"})))
 
 (defn main [request]
   (response
