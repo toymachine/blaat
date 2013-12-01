@@ -6,6 +6,9 @@
 (defn conn []
  (d/connect db-uri))
 
+(defn current-db []
+  (db (conn)))
+
 (defn make-db []
   (d/create-database db-uri))
 

@@ -1,9 +1,11 @@
 (ns blaat.handler
-  (:require [cemerick.friend :as friend]
-            [blaat.tmpl :as tmpl]
+  (:require [blaat.tmpl :as tmpl]
             [ring.util.response :as ring-response]
-            )
-  (:use [blaat.url]))
+            [clojure.tools.logging :as log]
+            [formative.core :as f]
+            [formative.parse :as fp])
+  (:use [blaat.url]
+        [blaat.i18n]))
 
 (defn response [& {:keys [status content-type headers body]
                    :or {status 200 content-type "text/html" headers {} body ""}}]
@@ -21,11 +23,34 @@
 (defn create-account-action [request]
   (redirect "/account/create"))
 
+(defn login-form []
+  {:action (dyn-url "/login")
+   :method "post"
+   :fields [{:name :email :type :email}
+            {:name :password :type :password}]
+   :validations [[:required [:email :password] (_t "Please enter both email and password")]]
+   :values {}
+   :submit-label (_t "Login")})
+
+
 (defn login [request]
   (response
-    :body (tmpl/main :title "Login" :content (tmpl/login-form))))
+    :body (tmpl/main :title "Login" :content (f/render-form (login-form)))))
+
+(defn login-action [request]
+  (prn (:params request))
+   (-> (redirect "/login")
+       (assoc :flash (_t "Wrong username or password"))))
 
 (defn main [request]
-  (friend/authorize #{::admin}
-    (response
-      :body (tmpl/main :title "Main" :content "Main Content"))))
+  (response
+    :body (tmpl/main :title "Main" :content "Main Content")))
+
+(comment
+  (login-form)
+(f/render-form (login-form))
+
+  (fp/with-fallback (fn [p] (prn p) (redirect "/login"))
+    (fp/parse-params (login-form) {:secret-code "xxx"} :validate true))
+
+  )

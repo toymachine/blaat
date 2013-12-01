@@ -18,9 +18,9 @@
 (defn login-form []
   [:form {:action (dyn-url "login") :method "post" :role "form"}
    [:label {:for "email"} "Email adress"]
-   [:input {:type "email" :class "form-control" :id "email" :placeholder "Enter email"}]
+   [:input {:type "email" :class "form-control" :name "email" :id "email" :placeholder "Enter email"}]
    [:label {:for "password"} "Password"]
-   [:input {:type "password" :class "form-control" :id "password" :placeholder "Password"}]
+   [:input {:type "password" :class "form-control" :name "password" :id "password" :placeholder "Password"}]
    [:button {:type "submit" :class "btn btn-cta"}] "Login"])
 
 (defn navbar []
@@ -48,6 +48,7 @@
         [:meta {:charset "utf-8"}]
         [:title title]
         [:link {:href (static-url "/css/bootstrap.min.css") :rel "stylesheet"}]
+        [:link {:href (static-url "/css/bootstrap-theme.min.css") :rel "stylesheet"}]
         [:link {:href (static-url "/css/blaat.css") :rel "stylesheet"}]
         [:link {:href (static-url "/images/favicon.png") :rel "shortcut icon"}]]
 
