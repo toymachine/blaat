@@ -1,16 +1,18 @@
 (ns blaat.db
   (:use [datomic.api :only [db q] :as d]))
 
-(def db-uri "datomic:free://localhost:4334/blaat")
+(def db-uri-development "datomic:free://localhost:4334/blaat")
+
+(def ^:dynamic *db-uri* db-uri-development)
 
 (defn conn []
- (d/connect db-uri))
+ (d/connect *db-uri*))
 
 (defn current-db []
   (db (conn)))
 
 (defn make-db []
-  (d/create-database db-uri))
+  (d/create-database *db-uri*))
 
 (defn make-schema []
   (d/transact (conn) [{:db/id (d/tempid :db.part/db)
@@ -29,3 +31,8 @@
                        :db.install/_attribute :db.part/db}
                       ]))
 
+(comment
+
+  (conn)
+
+  )

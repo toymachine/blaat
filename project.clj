@@ -9,6 +9,7 @@
          [org.clojure/clojurescript "0.0-2030"]
          [org.clojure/tools.logging "0.2.6"]
 				 [org.clojure/data.json "0.2.3"]
+         [lein-light-nrepl "0.0.1"]
          [commons-codec "1.6"]
          [clojurewerkz/spyglass "1.1.0"]
          [com.datomic/datomic-free "0.8.3561"]
@@ -18,4 +19,5 @@
 				 [criterium "0.4.2"]]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler blaat.app/blaat-app}
-  :main blaat.core)
+  :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]}
+  :main blaat.run)

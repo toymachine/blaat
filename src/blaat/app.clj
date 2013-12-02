@@ -2,6 +2,7 @@
   (:require [blaat.handler :as handler]
             [blaat.model :as model]
             [blaat.cache :as cache]
+            [blaat.db :as db]
             [clojurewerkz.spyglass.client :as c])
   (:use [net.cgrand.moustache]
         [ring.middleware.resource]
@@ -23,7 +24,8 @@
 
 (defn wrap-setup [app]
   (fn [req]
-    (binding [cache/*client* memcached-client]
+    (binding [cache/*client* memcached-client
+              db/*db-uri* db/db-uri-development]
       (app req))))
 
 (def blaat-app
