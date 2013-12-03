@@ -3,5 +3,5 @@
 (defn static-url [s]
   (str "/static" s))
 
-(defn dyn-url [s]
+(defn url [s]
   s)

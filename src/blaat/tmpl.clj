@@ -6,7 +6,7 @@
 
 
 (defn create-account-form []
-  [:form {:action (dyn-url "/account/create") :method "post" :role "form"}
+  [:form {:action (url "/account/create") :method "post" :role "form"}
    [:label {:for "email"} (_t "Email adress")]
    [:input {:type "email" :class "form-control" :id "email" :placeholder (_t "Enter email")}]
    [:label {:for "password"} (_t "Password")]
@@ -15,13 +15,6 @@
    [:input {:type "password" :class "form-control" :id "password2" :placeholder (_t "Enter password (repeat)")}]
    [:button {:type "submit" :class "btn btn-cta"}] (_t "Create account")])
 
-(defn login-form []
-  [:form {:action (dyn-url "login") :method "post" :role "form"}
-   [:label {:for "email"} "Email adress"]
-   [:input {:type "email" :class "form-control" :name "email" :id "email" :placeholder "Enter email"}]
-   [:label {:for "password"} "Password"]
-   [:input {:type "password" :class "form-control" :name "password" :id "password" :placeholder "Password"}]
-   [:button {:type "submit" :class "btn btn-cta"}] "Login"])
 
 (defn navbar []
    [:div {:class "navbar navbar-inverse navbar-fixed-top" :role "navigation"}
