@@ -7,7 +7,8 @@
             [formative.parse :as fp])
   (:use [blaat.url]
         [blaat.i18n]
-        [blaat.cache]))
+        [blaat.cache]
+        [blaat.form]))
 
 (defn response [& {:keys [status content-type headers body]
                    :or {status 200 content-type "text/html" headers {} body ""}}]
@@ -17,8 +18,7 @@
 
 (defn flash [response data]
   (let [flash-id (util/rand-string 16)]
-    (prn (cache-set! flash-id data))
-    (prn "flash" flash-id data)
+    (cache-set! flash-id data)
     (assoc response :flash flash-id)))
 
 (defn redirect [url]
@@ -37,33 +37,25 @@
    :fields [{:name :email :type :email}
             {:name :password :type :password}]
    :validations [[:required [:email :password] (_t "Please enter both email and password")]]
-   :values {}
    :submit-label (_t "Login")})
 
-
 (defn login [request]
-  (if-let [flash-id (:flash request)]
-    (prn flash-id (cache-get flash-id)))
-  (response
-    :body (tmpl/main :title "Login" :content (f/render-form (login-form)))))
+  (let [form (load-form request (login-form))]
+    (response
+      :body (tmpl/main :title (_t "Login") :content (f/render-form form)))))
 
 (defn login-action [request]
   (let [params (:params request)]
-    (prn params)
     (fp/with-fallback (fn [problems]
-                        (-> (redirect "/login")
-                            (flash {:form {:params params :problems problems}})))
+                        (let [problems (read-string (pr-str problems))];;not problems is a lazy seq
+                          (-> (redirect "/login")
+                              (flash {:form {:values params :problems problems}}))))
       (fp/parse-params (login-form) params :validate true))))
 
 (defn main [request]
   (response
-    :body (tmpl/main :title "Main" :content "Main Content")))
+    :body (tmpl/main :title (_t "Main") :content "Main Content")))
 
 (comment
-  (login-form)
-(f/render-form (login-form))
-
-  (fp/with-fallback (fn [p] (prn p) (redirect "/login"))
-    (fp/parse-params (login-form) {:secret-code "xxx"} :validate true))
 
   )
