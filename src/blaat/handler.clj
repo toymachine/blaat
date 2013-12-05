@@ -9,7 +9,11 @@
         [blaat.cache]
         [blaat.form]
         [blaat.response]
-        [blaat.user :only [get-user-id-by-email-and-password]]))
+        [blaat.user :only [logged-in-user? get-user-id-by-email-and-password user-name logged-in-user]]))
+
+(defn main-response [& {:keys [title content]}]
+  (response
+      :body (tmpl/main :title title :content content :logged-in-user? (logged-in-user?) :user-name (user-name (logged-in-user)))))
 
 (defn create-account [request]
   (response
@@ -34,8 +38,7 @@
 
 (defn login [request]
   (let [form (load-form request (login-form))]
-    (response
-      :body (tmpl/main :title (_t "Login") :content (render-form form)))))
+    (main-response :title (_t "Login") :content (render-form form))))
 
 (defn login-action [request]
   (validate-form request (login-form)
@@ -45,9 +48,8 @@
         (-> (redirect (url "/")) ;;TODO add redirect url to form
             (assoc :session {:user-id user-id})))))) ;sets up new session, e.g. if there was any it is now overwritten
 
-(defn main [request]
-  (response
-    :body (tmpl/main :title (_t "Main") :content "Main Content")))
+(defn index [request]
+  (main-response :title (_t "Main") :content "Main Content"))
 
 (comment
 

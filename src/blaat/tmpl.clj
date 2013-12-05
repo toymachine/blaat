@@ -33,7 +33,7 @@
            [:li [:a {:href "#"} "About"]]
            [:li [:a {:href "#"} "Contact"]]]]]])
 
-(defn main [&{:keys [title content logged-in-user? logged-in-user-name]
+(defn main [&{:keys [title content logged-in-user? user-name]
               :or {title "No title" content "" logged-in-user false}}]
   (html
     (html5
@@ -50,7 +50,7 @@
        (navbar)
 
        (when logged-in-user?
-          (str "Logged in! welcome: " logged-in-user-name))
+          (str "Logged in! welcome: " user-name))
 
        [:div.container
          [:div.starter-template

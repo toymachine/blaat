@@ -2,7 +2,7 @@
   (:require [blaat.handler :as handler]
             [blaat.user :as user]
             [blaat.cache :as cache]
-
+            [blaat.db :as db]
             [clojurewerkz.spyglass.client :as c])
   (:use [net.cgrand.moustache]
         [ring.middleware.resource]
@@ -39,7 +39,7 @@
        (wrap-session {:store (cookie-store {:key "sdfnOIU&!#kHJBMN"})})
        (user/wrap-logged-in-user)
        (wrap-flash)
-       [""] {:get handler/main}
+       [""] {:get handler/index}
        ["login"] {:get handler/login
                   :post handler/login-action}
        ["account" "create"] {:get handler/create-account

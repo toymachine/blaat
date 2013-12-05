@@ -46,6 +46,11 @@
         (app request)))))
 
 
+(defn user-name [user]
+  (if (seq (:user/name user))
+    (:user/name user)
+    (:account/email user)))
+
 (comment
 
   (create-account "harry3@potter.nl" "123456")
