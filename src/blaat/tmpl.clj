@@ -33,8 +33,8 @@
            [:li [:a {:href "#"} "About"]]
            [:li [:a {:href "#"} "Contact"]]]]]])
 
-(defn main [&{:keys [title content]
-              :or {title "No title" content ""}}]
+(defn main [&{:keys [title content logged-in-user? logged-in-user-name]
+              :or {title "No title" content "" logged-in-user false}}]
   (html
     (html5
      [:head
@@ -49,8 +49,11 @@
 
        (navbar)
 
-       [:div {:class "container"}
-         [:div {:class "starter-template"}
+       (when logged-in-user?
+          (str "Logged in! welcome: " logged-in-user-name))
+
+       [:div.container
+         [:div.starter-template
            content]]
 
        [:script {:src "https://code.jquery.com/jquery-1.10.2.min.js"}]

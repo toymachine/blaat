@@ -2,7 +2,9 @@
   (:require [blaat.util :as util]
             [formative.core :as f]
             [formative.parse :as fp]
-            [ring.util.response :as ring-response]))
+            [ring.util.response :as ring-response])
+  (:use [blaat.cache]
+        [blaat.response]))
 
 
 (defn render-form [form]

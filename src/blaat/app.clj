@@ -1,8 +1,8 @@
 (ns blaat.app
   (:require [blaat.handler :as handler]
-            [blaat.model :as model]
+            [blaat.user :as user]
             [blaat.cache :as cache]
-            [blaat.db :as db]
+
             [clojurewerkz.spyglass.client :as c])
   (:use [net.cgrand.moustache]
         [ring.middleware.resource]
@@ -37,6 +37,7 @@
        (wrap-params)
        (wrap-keyword-params)
        (wrap-session {:store (cookie-store {:key "sdfnOIU&!#kHJBMN"})})
+       (user/wrap-logged-in-user)
        (wrap-flash)
        [""] {:get handler/main}
        ["login"] {:get handler/login

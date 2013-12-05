@@ -14,3 +14,6 @@
   (let [flash-id (util/rand-string 16)]
     (cache-set! flash-id data)
     (assoc response :flash flash-id)))
+
+(defn redirect [uri]
+  (ring-response/redirect uri))

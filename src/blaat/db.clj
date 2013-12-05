@@ -9,7 +9,7 @@
  (d/connect *db-uri*))
 
 (defn current-db []
-  (db (conn)))
+  (db (conn))) ;TODO do this once per connection, in a ring wrapper
 
 (defn make-db []
   (d/create-database *db-uri*))
