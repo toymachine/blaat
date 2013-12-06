@@ -9,6 +9,7 @@
          [org.clojure/clojurescript "0.0-2030"]
          [org.clojure/tools.logging "0.2.6"]
 				 [org.clojure/data.json "0.2.3"]
+         [ring-anti-forgery "0.3.0"]
          [lein-light-nrepl "0.0.1"]
          [commons-codec "1.6"]
          [clojurewerkz/spyglass "1.1.0"]

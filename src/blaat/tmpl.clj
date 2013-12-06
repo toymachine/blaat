@@ -16,7 +16,8 @@
    [:button {:type "submit" :class "btn btn-cta"}] (_t "Create account")])
 
 
-(defn navbar []
+(defn navbar [&{:keys [logged-in-user? user-name]
+              :or {logged-in-user false}}]
    [:div {:class "navbar navbar-inverse navbar-fixed-top" :role "navigation"}
      [:div {:class "container"}
        [:div {:class "navbar-header"}
@@ -31,9 +32,26 @@
            [:li {:class "active"}
                 [:a {:href "#"} "Home"]]
            [:li [:a {:href "#"} "About"]]
-           [:li [:a {:href "#"} "Contact"]]]]]])
+           [:li [:a {:href "#"} "Contact"]]]
 
-(defn main [&{:keys [title content logged-in-user? user-name]
+           [:ul.nav.navbar-nav.navbar-right
+             (if logged-in-user?
+                [:li.dropdown
+                   [:a.dropdown-toggle {:href "#" :data-toggle "dropdown"} user-name [:b.caret]]
+                   [:ul.dropdown-menu
+                     [:li [:a {:href (url "/account")} (_t "Account")]]
+                     [:li.divider]
+                     [:li [:a {:href (url "/logout")} (_t "Logout")]]
+
+                    ]
+                 ]
+               ;;else
+                 [:li [:a {:href (url "/login")} (_t "Login")]])
+            ]
+
+        ]]])
+
+(defn main [&{:keys [title content logged-in-user? user-name script]
               :or {title "No title" content "" logged-in-user false}}]
   (html
     (html5
@@ -47,17 +65,17 @@
 
      [:body
 
-       (navbar)
-
-       (when logged-in-user?
-          (str "Logged in! welcome: " user-name))
+       (navbar :logged-in-user? logged-in-user? :user-name user-name)
 
        [:div.container
          [:div.starter-template
            content]]
 
        [:script {:src "https://code.jquery.com/jquery-1.10.2.min.js"}]
-       [:script {:src (static-url "/js/bootstrap.min.js")}]]
+       [:script {:src (static-url "/js/bootstrap.min.js")}]
+
+       (when (seq script)
+         [:script script])]
 
       )))
 

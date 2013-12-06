@@ -11,9 +11,9 @@
         [blaat.response]
         [blaat.user :only [logged-in-user? get-user-id-by-email-and-password user-name logged-in-user]]))
 
-(defn main-response [& {:keys [title content]}]
+(defn main-response [& {:keys [title content script]}]
   (response
-      :body (tmpl/main :title title :content content :logged-in-user? (logged-in-user?) :user-name (user-name (logged-in-user)))))
+      :body (tmpl/main :title title :content content :script script :logged-in-user? (logged-in-user?) :user-name (user-name (logged-in-user)))))
 
 (defn create-account [request]
   (response
@@ -25,7 +25,7 @@
 (defn- validate-password [{:keys [email password]}]
   (when (and (seq email) (seq password))
     (when-not (get-user-id-by-email-and-password email password)
-      {:keys [:email :password] :msg (_t "Invalid username or password")})))
+      {:keys [:email :password] :msg (_t "Invalid email or password")})))
 
 (defn login-form []
   {:action (url "/login")
@@ -47,6 +47,21 @@
             user-id (get-user-id-by-email-and-password email password)]
         (-> (redirect (url "/")) ;;TODO add redirect url to form
             (assoc :session {:user-id user-id})))))) ;sets up new session, e.g. if there was any it is now overwritten
+
+(defn logout-form []
+  {:id "logout-form"
+   :action (url "/logout")
+   :submit-label (_t "Logout")})
+
+(defn logout [request]
+  "bumper page that shows a logout button. the button is pressed automatically when javascript is enabled.
+  this lets us use POST for the actual logout preventing CSRF"
+  (let [script "$(function() { $('#logout-form #field-submit').click(); });"]
+    (main-response :title (_t "Logout") :content (render-form (logout-form)) :script script)))
+
+(defn logout-action [request]
+  (-> (redirect (url "/"))
+      (assoc :session {}))) ;clear session, which contained the logged-in user-id
 
 (defn index [request]
   (main-response :title (_t "Main") :content "Main Content"))

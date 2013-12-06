@@ -10,6 +10,7 @@
         [ring.middleware.params]
         [ring.middleware.keyword-params]
         [ring.middleware.flash]
+        [ring.middleware.anti-forgery]
         [ring.middleware.stacktrace]
         [ring.middleware.session]
         [ring.middleware.session.cookie]))
@@ -28,8 +29,18 @@
               db/*db-uri* db/db-uri-development]
       (app req))))
 
+(defn wrap-timing [app]
+  (fn [req]
+    (let [start (System/currentTimeMillis)
+          response (app req)
+          end (System/currentTimeMillis)
+          elapsed (- end start)]
+      (prn (str "request took " elapsed " ms"))
+      response)))
+
 (def blaat-app
     (app
+       (wrap-timing)
        (wrap-setup)
        (wrap-stacktrace)
        (wrap-resource "public")
@@ -37,18 +48,23 @@
        (wrap-params)
        (wrap-keyword-params)
        (wrap-session {:store (cookie-store {:key "sdfnOIU&!#kHJBMN"})})
+       (wrap-anti-forgery)
        (user/wrap-logged-in-user)
        (wrap-flash)
        [""] {:get handler/index}
        ["login"] {:get handler/login
                   :post handler/login-action}
+       ["logout"] {:get handler/logout
+                   :post handler/logout-action}
        ["account" "create"] {:get handler/create-account
                              :post handler/create-account-action}
      ))
 
 (comment
 
+    (prn "aap")
   (blaat-app {:url "/login"})
 
+  (System/currentTimeMillis)
   )
 
