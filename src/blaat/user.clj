@@ -1,7 +1,7 @@
 (ns blaat.user
   (:use [blaat.db]
         [datomic.api :only [db q] :as d])
-  (:require [noir.util.crypt :as crypt]))
+  (:require [clj-bcrypt-wrapper.core :as crypt]))
 
 (def ^:dynamic *logged-in-user* nil)
 
@@ -26,7 +26,7 @@
                   :where [?c account/email ?email]
                          [?c account/password ?password]] (current-db) email))]
         (let [[user-id encrypted-password] result]
-          (when (crypt/compare password encrypted-password)
+          (when (crypt/check-password password encrypted-password)
             user-id)))))
 
 (defn get-user-by-id [user-id]

@@ -9,6 +9,8 @@
          [org.clojure/clojurescript "0.0-2030"]
          [org.clojure/tools.logging "0.2.6"]
 				 [org.clojure/data.json "0.2.3"]
+         [ring/ring-core "1.2.1"]
+         [ring/ring-devel "1.2.1"]
          [ring-anti-forgery "0.3.0"]
          [lein-light-nrepl "0.0.1"]
          [commons-codec "1.6"]
@@ -16,7 +18,8 @@
          [com.datomic/datomic-free "0.8.3561"]
 				 [net.cgrand/moustache "1.2.0-alpha2"]
          [formative "0.8.7"]
-				 [lib-noir "0.7.6"]
+         [clj-bcrypt-wrapper "0.1.0"]
+				 [http-kit "2.1.13"]
 				 [criterium "0.4.2"]]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler blaat.app/blaat-app}
