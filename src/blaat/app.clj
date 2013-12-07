@@ -43,8 +43,6 @@
        (wrap-timing)
        (wrap-setup)
        (wrap-stacktrace)
-       (wrap-resource "public")
-       (wrap-file-info)
        (wrap-params)
        (wrap-keyword-params)
        (wrap-session {:store (cookie-store {:key "sdfnOIU&!#kHJBMN"})})
