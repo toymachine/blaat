@@ -5,15 +5,6 @@
         [hiccup.page]))
 
 
-(defn create-account-form []
-  [:form {:action (url "/account/create") :method "post" :role "form"}
-   [:label {:for "email"} (_t "Email adress")]
-   [:input {:type "email" :class "form-control" :id "email" :placeholder (_t "Enter email")}]
-   [:label {:for "password"} (_t "Password")]
-   [:input {:type "password" :class "form-control" :id "password" :placeholder (_t "Enter password")}]
-   [:label {:for "password2"} (_t "Password (repeat)")]
-   [:input {:type "password" :class "form-control" :id "password2" :placeholder (_t "Enter password (repeat)")}]
-   [:button {:type "submit" :class "btn btn-cta"}] (_t "Create account")])
 
 
 (defn navbar [&{:keys [logged-in-user? user-name]
