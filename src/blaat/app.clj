@@ -47,6 +47,7 @@
        (wrap-keyword-params)
        (wrap-session {:store (cookie-store {:key "sdfnOIU&!#kHJBMN"})})
        (wrap-anti-forgery)
+       (db/wrap-current-db)
        (user/wrap-logged-in-user)
        (wrap-flash)
        [""] {:get handler/index}

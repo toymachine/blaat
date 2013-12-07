@@ -8,8 +8,16 @@
 (defn conn []
  (d/connect *db-uri*))
 
+(def ^:dynamic *current-db* nil)
+
 (defn current-db []
-  (db (conn))) ;TODO do this once per connection, in a ring wrapper
+  *current-db*)
+
+(defn wrap-current-db [app]
+  "ring middleware to set the current db once per request, so that it is consistent during the request"
+  (fn [request]
+      (binding [*current-db* (db (conn))]
+        (app request))))
 
 (defn make-db []
   (d/create-database *db-uri*))
