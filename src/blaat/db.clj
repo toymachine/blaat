@@ -41,6 +41,12 @@
 
 (comment
 
+  (make-db)
+
+  (make-schema)
+
   (conn)
+
+  (d/sync)
 
   )
