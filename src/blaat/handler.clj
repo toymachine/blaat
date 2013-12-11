@@ -19,7 +19,7 @@
                      :user-name (user/user-name (user/logged-in-user)))))
 
 (defn create-account-form []
-  {:action (url "/account/create")
+  {:action (url "/register")
    :method "post"
    :fields [{:name :email :type :email}
             {:name :password :type :password}]
@@ -50,11 +50,11 @@
             {:name :password :type :password}]
    :validations [[:required [:email :password] (_t "Please enter both email and password")]]
    :validator validate-password
-   :submit-label (_t "Login")})
+   :submit-label (_t "Log in")})
 
 (defn login [request]
   (let [form (load-form request (login-form))]
-    (main-response :title (_t "Login") :content (render-form form))))
+    (main-response :title (_t "Log in") :content (render-form form))))
 
 (defn login-action [request]
   (validate-form request (login-form)
@@ -67,13 +67,13 @@
 (defn logout-form []
   {:id "logout-form"
    :action (url "/logout")
-   :submit-label (_t "Logout")})
+   :submit-label (_t "Log out")})
 
 (defn logout [request]
   "bumper page that shows a logout button. the button is pressed automatically when javascript is enabled.
   this lets us use POST for the actual logout preventing CSRF"
   (let [script "$(function() { $('#logout-form #field-submit').click(); });"]
-    (main-response :title (_t "Logout") :content (render-form (logout-form)) :script script)))
+    (main-response :title (_t "Log out") :content (render-form (logout-form)) :script script)))
 
 (defn logout-action [request]
   (-> (redirect (url "/"))

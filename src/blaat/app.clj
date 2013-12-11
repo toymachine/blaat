@@ -47,7 +47,7 @@
        (wrap-keyword-params)
        (wrap-session {:store (cookie-store {:key "sdfnOIU&!#kHJBMN"})})
        (wrap-anti-forgery)
-       (db/wrap-current-db)
+       (db/wrap-db)
        (user/wrap-logged-in-user)
        (wrap-flash)
        [""] {:get handler/index}
@@ -55,8 +55,8 @@
                   :post handler/login-action}
        ["logout"] {:get handler/logout
                    :post handler/logout-action}
-       ["account" "create"] {:get handler/create-account
-                             :post handler/create-account-action}
+       ["register"] {:get handler/create-account
+                     :post handler/create-account-action}
      ))
 
 (comment

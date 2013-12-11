@@ -32,12 +32,12 @@
                    [:ul.dropdown-menu
                      [:li [:a {:href (url "/account")} (_t "Account")]]
                      [:li.divider]
-                     [:li [:a {:href (url "/logout")} (_t "Logout")]]
+                     [:li [:a {:href (url "/logout")} (_t "Log out")]]
 
                     ]
                  ]
                ;;else
-                 [:li [:a {:href (url "/login")} (_t "Login")]])
+                 [:li [:a {:href (url "/login")} (_t "Log in")]])
             ]
 
         ]]])

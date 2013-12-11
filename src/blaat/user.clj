@@ -1,7 +1,6 @@
 (ns blaat.user
-  (:use [blaat.db]
-        [datomic.api :only [db q] :as d])
-  (:require [clj-bcrypt-wrapper.core :as crypt]))
+  (:require [blaat.db :as db]
+            [clj-bcrypt-wrapper.core :as crypt]))
 
 (def ^:dynamic *logged-in-user* nil)
 
@@ -12,10 +11,11 @@
   (boolean (logged-in-user)))
 
 (defn create-account [email password]
-  ;;TODO validate email and password
-  (let [user-id (d/tempid :db.part/user)]
-    (d/transact (conn) [{:db/id user-id :account/email email}
-                        {:db/id user-id :account/password (crypt/encrypt password)}])))
+  ;;TODO validate email and password, catch unique email exception?
+  (let [user-id (db/tempid :db.part/user)
+        result  (db/transact [{:db/id user-id :account/email email}
+                              {:db/id user-id :account/password (crypt/encrypt password)}])]
+    (prn result)))
 
 (defn get-user-id-by-email-and-password [email password]
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"
