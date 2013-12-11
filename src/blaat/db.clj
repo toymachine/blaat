@@ -22,23 +22,42 @@
   also to sync db so that user who posted stuff gets to see his own stuff when connecting to a random peer
   (avoids problems due to slave delay)"
   (fn [request]
-    (let [basis-t (get-in request [:session :basis-t]) ;;check if any basis-t
+    (let [request-session (:session request)
+          basis-t (:basis-t request-session) ;;check if any basis-t
           connection (connect)]
+
       (binding [*current-db*
                   (if basis-t
-                    ;;wait till this peer (slave is up to date wrt the basis) (TODO timeout)
-                    @(d/sync connection basis-t)
-                    ;;else just get the latest available version
+                    ;;there is a basit-t, wait till this peer/slave is up to date wrt the given basis-t but only wait for 1000ms
+                    (if-let [current-db (deref (d/sync connection basis-t) 1000 nil)]
+                      current-db
+                      ;;timeout on the sync, just get the lates available then
+                      (db connection))
+                    ;;no basis-t just get the latest available version
                     (db connection))
                 *basis-ts* (atom [])] ;;set up list of basis-ts to gather during this request
-        (let [response (app request)
-              session (:session request)
-              basis-ts @*basis-ts*
-              max-basis-t (when (seq basis-ts) (apply max basis-ts))] ;;if any transaction occured, find the max basis-t
-          (if max-basis-t
-            (assoc-in response [:session :basis-t] max-basis-t) ;;if any max basis-t put it in the session
-            ;;else
-            response))))))
+
+        (let [response (app request) ;;<--- generate response
+
+              response-session (:session response)
+              basis-ts @*basis-ts*]
+          (if-let [new-basis-t (when (seq basis-ts) (apply max basis-ts))]
+            ;;if any transaction occured, we have new basis-t and we put it in the session to be found on next request
+            (assoc response :session (assoc (or response-session request-session) :basis-t new-basis-t))
+            ;;else no new basis-t:
+            (if response-session
+              ;;updated session in response, we remove any basis-t from it if any
+              (assoc response :session (dissoc response-session :basis-t))
+              ;;no response session
+              (if basis-t
+                ;;but there was basis-t in request session, remove it
+                (assoc response :session (dissoc request-session :basis-t))
+                ;;no basis-t, no response-session, just normal response
+                response))))))))
+
+
+
+
 
 (defn transact [tx-data]
   (let [result @(d/transact (connect) tx-data)
@@ -78,7 +97,13 @@
 
   (d/sync)
 
+  (or {:piet "aap"} {:blaat "klaas"})
 
+  (:basis-t nil)
+
+  (assoc nil :piet "klaas")
+
+  (dissoc {} :piet)
 
   (assoc-in {:body "Aap" :session {:blaat 20}} [:session :basis-t] 1024)
 

@@ -15,7 +15,7 @@
   (let [user-id (db/tempid :db.part/user)
         result  (db/transact [{:db/id user-id :account/email email}
                               {:db/id user-id :account/password (crypt/encrypt password)}])]
-    (prn result)))
+    result))
 
 (defn get-user-id-by-email-and-password [email password]
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"
