@@ -18,12 +18,16 @@
                      :logged-in-user? (user/logged-in-user?)
                      :user-name (user/user-name (user/logged-in-user)))))
 
+(defn- validate-create-account [{:keys [password]}])
+
+
 (defn create-account-form []
   {:action (url "/register")
    :method "post"
    :fields [{:name :email :type :email}
             {:name :password :type :password}]
-   :validations [[:required [:email :password] (_t "Please enter both email and password")]]
+   :validations [[:required [:email :password] (_t "Please enter both email and password")]
+                 [:email [:email] (_t "Please provide a valid email address")]]
    :submit-label (_t "Create account")})
 
 ;;TODO make sure not logged in

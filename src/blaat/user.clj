@@ -1,6 +1,8 @@
 (ns blaat.user
   (:require [blaat.db :as db]
-            [clj-bcrypt-wrapper.core :as crypt]))
+            [clj-bcrypt-wrapper.core :as crypt]
+            [jkkramer.verily :as v])
+  (:use [blaat.i18n]))
 
 (def ^:dynamic *logged-in-user* nil)
 
@@ -9,6 +11,17 @@
 
 (defn logged-in-user? []
   (boolean (logged-in-user)))
+
+(defn validate-password [password]
+  (let [cnt #(count (filter % password))
+        validations
+           [[(not (seq password)) (_t "Password cannot be empty")]
+            [(< (count password) 6) (_t "Password must contain at least 6 characters")]
+            [(> (count password) 32) (_t "Password can have a most 32 characters")]
+            [(< (cnt #(Character/isUpperCase %)) 1) (_t "Password must have at least 1 uppercase character")]
+            [(< (cnt #(Character/isLowerCase %)) 1) (_t "Password must have at least 1 lowercase character")]
+            [(< (cnt #(Character/isDigit %)) 1) (_t "Password must contain at least 1 digit")]]]
+    (first (for [[x y] validations :when x] y))))
 
 (defn create-account [email password]
   ;;TODO validate email and password, catch unique email exception?
@@ -33,7 +46,7 @@
   "returns the user entity by the given user-id or nil if it does not exist"
   (when user-id
     (let [db (current-db)
-          exists? (ffirst (d/q '[:find ?e :in $ ?e :where [?e]] db user-id))]
+          exists? (ffirst (q '[:find ?e :in $ ?e :where [?e]] db user-id))]
       (when exists?
         (d/entity db user-id)))))
 
