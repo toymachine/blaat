@@ -62,7 +62,7 @@
          [:div.starter-template
            content]]
 
-       [:script {:src "https://code.jquery.com/jquery-1.10.2.min.js"}]
+       [:script {:src (static-url "/js/jquery-1.10.2.min.js")}]
        [:script {:src (static-url "/js/bootstrap.min.js")}]
 
        (when (seq script)
