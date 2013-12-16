@@ -25,3 +25,6 @@ RUN apt-get install -y oracle-java7-installer
 
 #install maven
 RUN apt-get install -y maven
+
+#download and install datomic
+ADD https://dl.dropboxusercontent.com/u/1201552/datomic-pro-0.9.4331.tgz /tmp
