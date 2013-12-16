@@ -27,4 +27,7 @@ RUN apt-get install -y oracle-java7-installer
 RUN apt-get install -y maven
 
 #download and install datomic
-ADD https://dl.dropboxusercontent.com/u/1201552/datomic-pro-0.9.4331.tgz /tmp
+ADD datomic-pro-0.9.4331.tgz /opt
+ADD transactor.dev.properties /opt/datomic-pro-0.9.4331/
+
+ENTRYPOINT cd /opt/datomic-pro-0.9.4331; ./bin/transactor transactor.dev.properties
