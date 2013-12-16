@@ -29,5 +29,4 @@ RUN apt-get install -y maven
 #download and install datomic
 ADD datomic-pro-0.9.4331.tgz /opt
 ADD transactor.dev.properties /opt/datomic-pro-0.9.4331/
-
 ENTRYPOINT cd /opt/datomic-pro-0.9.4331; ./bin/transactor transactor.dev.properties
