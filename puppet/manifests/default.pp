@@ -1,5 +1,7 @@
 # default.pp - puppet provisioning
 
+  $user = 'vagrant'
+
   # define a variable for the webupd8team ppa sources list
   $webupd8src = '/etc/apt/sources.list.d/webupd8team.list'
  
@@ -35,3 +37,36 @@
   package { 'oracle-java7-installer':
     ensure => present,
   }
+
+
+  file { "leiningen/create-local-bin-folder":
+    ensure => directory,
+    path => "/home/$user/bin",
+    owner => $user,
+    group => $user,
+    mode => '755',
+  }
+
+  $leiningen_url = "https://raw.github.com/technomancy/leiningen/preview/bin/lein"
+
+  exec { "leiningen/install-script":
+    user => $user,
+    group => $user,
+    path => ["/bin", "/usr/bin", "/usr/local/bin"],
+    cwd => "/home/$user/bin",
+    command => "wget ${leiningen_url} && chmod 755 lein",
+    creates => ["/home/$user/.bin/lein",
+                "/home/$user/.lein"],
+    require => [#Class["java::install"],
+                File["leiningen/create-local-bin-folder"],
+                #Package["leiningen/install-wget"]
+                ],
+  }
+
+
+ file { "/etc/profile.d/path.sh":
+  content => "export PATH=\$PATH:~/bin
+  "
+ }
+
+
