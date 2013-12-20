@@ -2,6 +2,8 @@
 
   $user = 'vagrant'
 
+  class java::install {
+
   # define a variable for the webupd8team ppa sources list
   $webupd8src = '/etc/apt/sources.list.d/webupd8team.list'
  
@@ -37,7 +39,9 @@
   package { 'oracle-java7-installer':
     ensure => present,
   }
+}
 
+include java::install
 
   file { "leiningen/create-local-bin-folder":
     ensure => directory,
@@ -49,7 +53,7 @@
 
   $leiningen_url = "https://raw.github.com/technomancy/leiningen/preview/bin/lein"
 
-  exec { "leiningen/install-script":
+  exec { "leiningen/install":
     user => $user,
     group => $user,
     path => ["/bin", "/usr/bin", "/usr/local/bin"],
@@ -57,16 +61,49 @@
     command => "wget ${leiningen_url} && chmod 755 lein",
     creates => ["/home/$user/.bin/lein",
                 "/home/$user/.lein"],
-    require => [#Class["java::install"],
+    require => [Class["java::install"],
                 File["leiningen/create-local-bin-folder"],
-                #Package["leiningen/install-wget"]
-                ],
+    ],
   }
-
+ 
 
  file { "/etc/profile.d/path.sh":
-  content => "export PATH=\$PATH:~/bin
-  "
+  content => "export PATH=\$PATH:~/bin"
  }
+
+ exec { "datomic/install":
+    command => "wget -qO- https://dl.dropboxusercontent.com/u/1201552/datomic-pro-0.9.4331.tgz | tar -zx -C /opt",
+    cwd => "/",
+    path => ["/bin", "/usr/bin", "/usr/local/bin"],
+    creates  =>  "/opt/datomic-pro-0.9.4331",
+ }
+
+
+package { 'maven':
+      ensure => present,
+}
+
+ exec { "datomic/maven-install":
+  cwd => "/opt/datomic-pro-0.9.4331",
+    user => $user,
+    group => $user,
+    path => ["/opt/datomic-pro-0.9.4331/bin", "/home/$user/bin", "/bin", "/usr/bin", "/usr/local/bin"],
+    environment => [ "HOME=/home/vagrant" ],
+  command => "maven-install > /tmp/maven.txt 2>&1",
+  require => [Exec['datomic/install'], Package['maven']],
+   logoutput => true,
+}
+
+ exec { "leiningen/init-deps":
+  cwd => "/vagrant",
+    user => $user,
+    group => $user,
+    path => ["/home/$user/bin", "/bin", "/usr/bin", "/usr/local/bin"],
+    environment => [ "HOME=/home/vagrant" ],
+  command => "lein deps",
+  require => [Exec['leiningen/install'], Exec['datomic/maven-install'], File["/etc/profile.d/path.sh"]],
+}
+
+ class { 'nginx': }
 
 
