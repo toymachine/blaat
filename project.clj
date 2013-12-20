@@ -23,5 +23,7 @@
 				 [criterium "0.4.2"]]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler blaat.app/blaat-app}
-  :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]}
+  :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]
+                 :host "0.0.0.0"
+                 :port 12345}
   :main blaat.run)
