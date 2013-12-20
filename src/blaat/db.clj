@@ -1,5 +1,5 @@
 (ns blaat.db
-  (:use [datomic.api :only [db q] :as d]))
+  (:require [datomic.api :as d]))
 
 (def db-uri-development "datomic:free://localhost:4334/blaat")
 
@@ -10,12 +10,19 @@
 (defn connect []
  (d/connect *db-uri*))
 
+
 (def ^:dynamic *current-db* nil)
 
 (def ^:dynamic *basis-ts* nil) ;list of db-after basis-t's for this requests transactions
 
-(defn current-db []
+(defn current []
   *current-db*)
+
+(defn q [qry & inputs]
+  (apply d/q qry (current) inputs))
+
+(defn entity [entity-id]
+  (d/entity (current) entity-id))
 
 (defn wrap-db [app]
   "ring middleware to set the current db once per request, so that it is consistent during the request
@@ -32,9 +39,9 @@
                     (if-let [current-db (deref (d/sync connection basis-t) 1000 nil)]
                       current-db
                       ;;timeout on the sync, just get the lates available then
-                      (db connection))
+                      (d/db connection))
                     ;;no basis-t just get the latest available version
-                    (db connection))
+                    (d/db connection))
                 *basis-ts* (atom [])] ;;set up list of basis-ts to gather during this request
 
         (let [response (app request) ;;<--- generate response

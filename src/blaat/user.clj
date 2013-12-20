@@ -21,7 +21,7 @@
             [(< (cnt #(Character/isUpperCase %)) 1) (_t "Password must have at least 1 uppercase character")]
             [(< (cnt #(Character/isLowerCase %)) 1) (_t "Password must have at least 1 lowercase character")]
             [(< (cnt #(Character/isDigit %)) 1) (_t "Password must contain at least 1 digit")]]]
-    (first (for [[x y] validations :when x] y))))
+    (first (for [[x y] validations :when x] y)))) ;return the first failed validation
 
 (defn create-account [email password]
   ;;TODO validate email and password, catch unique email exception?
@@ -34,21 +34,20 @@
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"
   (when (and (seq email) (seq password) (string? email) (string? password))
     (when-let [result
-      (first (q '[:find ?c ?password
-                  :in $ ?email
-                  :where [?c account/email ?email]
-                         [?c account/password ?password]] (current-db) email))]
+      (first (db/q '[:find ?c ?password
+                     :in $ ?email
+                     :where [?c account/email ?email]
+                            [?c account/password ?password]] email))]
         (let [[user-id encrypted-password] result]
           (when (crypt/check-password password encrypted-password)
             user-id)))))
 
-(defn get-user-by-id [user-id]
+(defn get-user-by-id
   "returns the user entity by the given user-id or nil if it does not exist"
-  (when user-id
-    (let [db (current-db)
-          exists? (ffirst (q '[:find ?e :in $ ?e :where [?e]] db user-id))]
-      (when exists?
-        (d/entity db user-id)))))
+  [user-id]
+    (when user-id
+      (when (ffirst (db/q '[:find ?e :in $ ?e :where [?e]] user-id))
+        (db/entity user-id))))
 
 (defn wrap-logged-in-user [app]
   "ring middleware to set logged in user var when logged in user is present in session"
