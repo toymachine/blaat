@@ -71,11 +71,16 @@ include java::install
   content => "export PATH=\$PATH:~/bin"
  }
 
+ file { ["/var", "/var/lib", "/var/lib/datomic", "/var/lib/datomic/runtime"]:
+   ensure => "directory",
+ }
+
  exec { "datomic/install":
-    command => "wget -qO- https://dl.dropboxusercontent.com/u/1201552/datomic-pro-0.9.4331.tgz | tar -zx -C /opt",
+    command => "wget -qO- https://dl.dropboxusercontent.com/u/1201552/datomic-pro-0.9.4331.tgz | tar -zx -C /var/lib/datomic/runtime --strip-components=1",
     cwd => "/",
     path => ["/bin", "/usr/bin", "/usr/local/bin"],
-    creates  =>  "/opt/datomic-pro-0.9.4331",
+    creates  =>  "/var/lib/datomic/runtime/transactor-pom.xml",
+    require => File["/var/lib/datomic/runtime"]
  }
 
 
@@ -84,10 +89,10 @@ package { 'maven':
 }
 
  exec { "datomic/maven-install":
-  cwd => "/opt/datomic-pro-0.9.4331",
+  cwd => "/var/lib/datomic/runtime",
     user => $user,
     group => $user,
-    path => ["/opt/datomic-pro-0.9.4331/bin", "/home/$user/bin", "/bin", "/usr/bin", "/usr/local/bin"],
+    path => ["/var/lib/datomic/runtime/bin", "/home/$user/bin", "/bin", "/usr/bin", "/usr/local/bin"],
     environment => [ "HOME=/home/vagrant" ],
   command => "maven-install > /tmp/maven.txt 2>&1",
   require => [Exec['datomic/install'], Package['maven']],
