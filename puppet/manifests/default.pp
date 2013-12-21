@@ -153,4 +153,8 @@ package { 'maven':
 
  class { 'nginx': }
 
+class { 'memcached':
+      max_memory => 128
+}
+
 
