@@ -71,8 +71,44 @@ include java::install
   content => "export PATH=\$PATH:~/bin"
  }
 
- file { ["/var", "/var/lib", "/var/lib/datomic", "/var/lib/datomic/runtime"]:
+file { "/etc/init/datomic.conf":
+    source => "/vagrant/puppet/modules/datomic/datomic.conf"
+}
+
+
+ group { "datomic/group":
+  name => "datomic",
+  ensure => "present",
+ }
+
+ user { "datomic/user":
+  name => "datomic",
+  ensure => "present",
+  home => "/var/lib/datomic",
+  gid => "datomic",
+  require => [File["/var/lib/datomic"], Group["datomic/group"]]
+ }
+
+ file { ["/var", "/var/lib", "/var/lib/datomic"]:
    ensure => "directory",
+ }
+
+ file { "/var/lib/datomic/runtime":
+   ensure => "directory",
+ }
+
+ file { "/var/lib/datomic/data":
+   ensure => "directory",
+   owner => "datomic",   
+   group => "datomic",
+   require => [File["/var/lib/datomic"], User["datomic/user"], Group["datomic/group"]],
+ }
+
+ file { "/var/log/datomic":
+   ensure => "directory",
+   owner => "datomic",   
+   group => "datomic",
+   require => [User["datomic/user"], Group["datomic/group"]],
  }
 
  exec { "datomic/install":
@@ -80,8 +116,14 @@ include java::install
     cwd => "/",
     path => ["/bin", "/usr/bin", "/usr/local/bin"],
     creates  =>  "/var/lib/datomic/runtime/transactor-pom.xml",
-    require => File["/var/lib/datomic/runtime"]
+    require => [File["/var/lib/datomic/runtime"], File["/var/lib/datomic/data"], File["/var/log/datomic"], File["/etc/init/datomic.conf"], User["datomic/user"]]
  }
+
+service { "datomic/service":
+  name => "datomic", 
+  ensure => "running",
+  require => Exec["datomic/install"]
+}
 
 
 package { 'maven':
