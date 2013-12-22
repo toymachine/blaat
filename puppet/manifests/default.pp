@@ -2,6 +2,12 @@
 
   $user = 'vagrant'
 
+exec { "apt-update":
+    command => "/usr/bin/apt-get update"
+}
+
+Exec["apt-update"] -> Package <| |>
+
 class { 'java':
   distribution => 'jdk',
   version      => 'latest',
@@ -10,7 +16,7 @@ class { 'java':
   file { "leiningen/create-local-bin-folder":
     ensure => directory,
     path => "/home/$user/bin",
-    owner => $user,
+    owner => $user, 
     group => $user,
     mode => '755',
   }
@@ -125,7 +131,35 @@ package { 'maven':
   require => [Exec['leiningen/install'], Exec['datomic/maven-install'], File["/etc/profile.d/path.sh"]],
 }
 
- class { 'nginx': }
+package { 'nginx':
+  ensure => present,
+}
+
+file { "/etc/nginx/conf.d/default.conf":
+  ensure => absent,
+  require => [Package['nginx']],
+}
+
+file { "/etc/nginx/conf.d/example_ssl.conf":
+  ensure => absent,
+  require => [Package['nginx']],
+}
+
+file { "/etc/nginx/conf.d/proxy.conf":
+  ensure => absent,
+  require => [Package['nginx']],
+}
+
+file { "/etc/nginx/conf.d/blaat.conf":
+  ensure => present,
+  require => [Package['nginx']],
+  source => "/vagrant/puppet/modules/blaat/blaat.conf"
+}
+
+service { 'nginx':
+  ensure => running,
+  require => [Package['nginx'], File['/etc/nginx/conf.d/blaat.conf']],
+}
 
 class { 'memcached':
       max_memory => 128,
