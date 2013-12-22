@@ -72,25 +72,28 @@
     (swap! *basis-ts* conj basis-t)
     result))
 
-(defn make-db []
-  (d/create-database *db-uri*))
+(defn create-db []
+  (when (d/create-database *db-uri*)
+    (d/transact (connect) [{:db/id (d/tempid :db.part/db)
+                             :db/ident :account/email
+                             :db/unique :db.unique/value
+                             :db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one
+                             :db/doc "An accounts email"
+                             :db.install/_attribute :db.part/db}
 
-(defn make-schema []
-  (d/transact (connect) [{:db/id (d/tempid :db.part/db)
-                       :db/ident :account/email
-                       :db/unique :db.unique/value
-                       :db/valueType :db.type/string
-                       :db/cardinality :db.cardinality/one
-                       :db/doc "An accounts email"
-                       :db.install/_attribute :db.part/db}
+                            {:db/id (d/tempid :db.part/db)
+                             :db/ident :account/password
+                             :db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one
+                             :db/doc "An accounts encrypted password"
+                             :db.install/_attribute :db.part/db}
+                            ])
+    (System/exit 0)))
 
-                      {:db/id (d/tempid :db.part/db)
-                       :db/ident :account/password
-                       :db/valueType :db.type/string
-                       :db/cardinality :db.cardinality/one
-                       :db/doc "An accounts encrypted password"
-                       :db.install/_attribute :db.part/db}
-                      ]))
+(defn delete-db []
+  (d/delete-database *db-uri*)
+  (System/exit 0))
 
 (comment
 
