@@ -25,5 +25,10 @@
   :ring {:handler blaat.app/blaat-app}
   :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]
                  :host "0.0.0.0"
-                 :port 12345}
+                 :port 12345
+                 :init (do
+                    (use 'blaat.run)
+                    (start))
+
+               }
   :main blaat.run)

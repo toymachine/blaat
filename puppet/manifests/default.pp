@@ -81,6 +81,12 @@ file { "/etc/init/datomic.conf":
    require => [User["datomic/user"], Group["datomic/group"]],
  }
 
+ file { "/var/log/blaat":
+   ensure => "directory",
+   owner => "vagrant",   
+   group => "vagrant",
+ }
+
  exec { "datomic/install":
     command => "wget -qO- https://dl.dropboxusercontent.com/u/1201552/datomic-pro-0.9.4331.tgz | tar -zx -C /var/lib/datomic/runtime --strip-components=1",
     cwd => "/",
@@ -101,9 +107,14 @@ service { "datomic/service":
     group => $user,
     path => ["/home/$user/bin", "/bin", "/usr/bin", "/usr/local/bin"],
     environment => [ "HOME=/home/vagrant" ],
-  command => "lein run -m blaat.db/create-db",
+  command => "sleep 30 && lein run -m blaat.db/create-db",
   require => [Exec['leiningen/install'], Service['datomic/service']]
 }
+
+file { "/etc/init/blaat.conf":
+    source => "/vagrant/puppet/modules/blaat/blaat.init.conf"
+}
+
 
 
 package { 'maven':
@@ -129,6 +140,12 @@ package { 'maven':
     environment => [ "HOME=/home/vagrant" ],
   command => "lein deps",
   require => [Exec['leiningen/install'], Exec['datomic/maven-install'], File["/etc/profile.d/path.sh"]],
+}
+
+service { "blaat/service":
+  name => "blaat", 
+  ensure => "running",
+  require => [Exec["leiningen/init-deps"], File["/var/log/blaat"]],
 }
 
 package { 'nginx':
