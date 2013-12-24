@@ -1,8 +1,9 @@
 (ns blaat.user
   (:require [blaat.db :as db]
             [clj-bcrypt-wrapper.core :as crypt]
-            [jkkramer.verily :as v])
+            [blaat.validate :as v])
   (:use [blaat.i18n]))
+
 
 (def ^:dynamic *logged-in-user* nil)
 
@@ -12,35 +13,31 @@
 (defn logged-in-user? []
   (boolean (logged-in-user)))
 
-(defn validate-password [password]
-  (let [cnt #(count (filter % password))
-        validations
-           [[(not (seq password)) (_t "Password cannot be empty")]
-            [(< (count password) 6) (_t "Password must contain at least 6 characters")]
-            [(> (count password) 32) (_t "Password can have a most 32 characters")]
-            [(< (cnt #(Character/isUpperCase %)) 1) (_t "Password must have at least 1 uppercase character")]
-            [(< (cnt #(Character/isLowerCase %)) 1) (_t "Password must have at least 1 lowercase character")]
-            [(< (cnt #(Character/isDigit %)) 1) (_t "Password must contain at least 1 digit")]]]
-    (first (for [[x y] validations :when x] y)))) ;return the first failed validation
 
 (defn ex-data* [ex]
-  (if-let [data (ex-data ex)]
+ (if-let [data (ex-data ex)]
     data
-    ;;else check cause
+    ;;else recurse/check cause
     (when-let [cause (.getCause ex)]
-      (ex-data* cause))))
+      (recur cause))))
 
 (defn create-account [email password]
+
   ;;TODO validate email and password, catch unique email exception?
-  (if-let [msg (validate-password password)]
-    (throw (ex-info (_t "Account creation failed, invalid pasword") {})))
+  (if-let [msg (v/validate-password password)]
+    (throw (ex-info (_t "Account creation failed, invalid pasword") {:msg msg})))
+  (if-let [msg (v/validate-email email)]
+    (throw (ex-info (_t "Account creation failed, invalid email") {:msg msg})))
+
   (let [user-id (db/tempid :db.part/user)]
     (try
       (db/transact [{:db/id user-id :account/email email}
                     {:db/id user-id :account/password (crypt/encrypt password)}])
 
       (catch Exception ex
-        (throw (ex-info (_t "Account creation failed") (ex-data* ex)))))))
+        (do
+          (prn (ex-data* ex))
+          (throw (ex-info (_t "Account creation failed") (ex-data* ex))))))))
 
 (defn get-user-id-by-email-and-password [email password]
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"
