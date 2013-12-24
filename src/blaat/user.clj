@@ -22,8 +22,7 @@
       (recur cause))))
 
 (defn create-account [email password]
-
-  ;;TODO validate email and password, catch unique email exception?
+  "creates an account with given email (pk) and password"
   (if-let [msg (v/validate-password password)]
     (throw (ex-info (_t "Account creation failed, invalid pasword") {:msg msg})))
   (if-let [msg (v/validate-email email)]
@@ -33,10 +32,8 @@
     (try
       (db/transact [{:db/id user-id :account/email email}
                     {:db/id user-id :account/password (crypt/encrypt password)}])
-
       (catch Exception ex
         (do
-          (prn (ex-data* ex))
           (throw (ex-info (_t "Account creation failed") (ex-data* ex))))))))
 
 (defn get-user-id-by-email-and-password [email password]
@@ -50,6 +47,16 @@
         (let [[user-id encrypted-password] result]
           (when (crypt/check-password password encrypted-password)
             user-id)))))
+
+(defn get-user-by-email
+  "returns the user entity by the given email or nil if it does not exist"
+  [email]
+    (when email
+      (when-let [user-id
+         (ffirst (db/q '[:find ?user-id
+                         :in $ ?email
+                         :where [?user-id account/email ?email]] email))]
+            (db/entity user-id))))
 
 (defn get-user-by-id
   "returns the user entity by the given user-id or nil if it does not exist"
@@ -74,9 +81,12 @@
 
 (comment
 
+
+  (get-user-by-email "")
+
   (create-account "harry3@potter.nl" "123456")
 
-  (get-user-id-by-email-and-password "harry3@potter.nl" "123456")
+  (get-user-id-by-email-and-password "henk@aap.nl" "123456")
   (get-user-id-by-email-and-password "harry4@potter.nl" "123456")
 
   17592186045418
@@ -87,9 +97,9 @@
 
   (logged-in-user?)
 
-  (q '[:find ?e
-       :in $ ?user-id
-       :where [?e db/id ?user-id]] (current-db) 12345)
+  (db/q '[:find ?e
+          :in $ ?user-id
+          :where [?e db/id ?user-id]] 12345)
 
   (crypt/compare "123457" (crypt/encrypt "123456"))
 

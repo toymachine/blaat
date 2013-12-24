@@ -16,7 +16,7 @@
 (def ^:dynamic *basis-ts* nil) ;list of db-after basis-t's for this requests transactions
 
 (defn current []
-  *current-db*)
+  (or *current-db* (d/db (connect))))
 
 (defn q [qry & inputs]
   (apply d/q qry (current) inputs))

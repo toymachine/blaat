@@ -2,7 +2,7 @@
   (:require [blaat.tmpl :as tmpl]
             [blaat.util :as util]
             [blaat.user :as user]
-            [clojure.tools.logging :as log]
+            [blaat.validate :as v]
             [formative.core :as f]
             [formative.parse :as fp]
             )
@@ -18,7 +18,11 @@
                      :logged-in-user? (user/logged-in-user?)
                      :user-name (user/user-name (user/logged-in-user)))))
 
-(defn- validate-create-account [{:keys [password]}])
+(defn- validate-create-account-form [{:keys [email password]}]
+  (if (user/get-user-by-email email)
+    {:keys [:email] :msg (_t "An account with this email address already exists")}
+    (if-let [msg (v/validate-password password)]
+      {:keys [:password] :msg msg})))
 
 
 (defn create-account-form []
@@ -28,6 +32,7 @@
             {:name :password :type :password}]
    :validations [[:required [:email :password] (_t "Please enter both email and password")]
                  [:email [:email] (_t "Please provide a valid email address")]]
+   :validator validate-create-account-form
    :submit-label (_t "Create account")})
 
 ;;TODO make sure not logged in
@@ -39,7 +44,7 @@
   (when-valid-form request (create-account-form)
    (fn [values]
      (let [{:keys [email password]} values]
-       (user/create-account email password) ;;TODO handle error about duplicate email and sync db
+       (user/create-account email password)
        (redirect (url "/")))))) ;;TODO add redirect to correct url
 
 (defn- validate-login-password [{:keys [email password]}]
