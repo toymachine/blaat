@@ -21,16 +21,19 @@
     (when-let [cause (.getCause ex)]
       (recur cause))))
 
-(defn create-account [email password]
-  "creates an account with given email (pk) and password"
-  (if-let [msg (v/validate-password password)]
+(defn create-account [name email password]
+  "creates an account with given name, email (pk) and password"
+  (when-not (seq name)
+    (throw (ex-info (_t "Account creation failed, no name given"))))
+  (when-let [msg (v/validate-password password)]
     (throw (ex-info (_t "Account creation failed, invalid pasword") {:msg msg})))
-  (if-let [msg (v/validate-email email)]
+  (when-let [msg (v/validate-email email)]
     (throw (ex-info (_t "Account creation failed, invalid email") {:msg msg})))
 
   (let [user-id (db/tempid :db.part/user)]
     (try
-      (db/transact [{:db/id user-id :account/email email}
+      (db/transact [{:db/id user-id :user/name name}
+                    {:db/id user-id :account/email email}
                     {:db/id user-id :account/password (crypt/encrypt password)}])
       (catch Exception ex
         (do

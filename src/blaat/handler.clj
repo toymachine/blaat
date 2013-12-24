@@ -28,9 +28,10 @@
 (defn create-account-form []
   {:action (url "/register")
    :method "post"
-   :fields [{:name :email :type :email}
+   :fields [{:name :name :type :text}
+            {:name :email :type :email}
             {:name :password :type :password}]
-   :validations [[:required [:email :password] (_t "Please enter both email and password")]
+   :validations [[:required [:name :email :password] (_t "Please provide a name, email address and password")]
                  [:email [:email] (_t "Please provide a valid email address")]]
    :validator validate-create-account-form
    :submit-label (_t "Create account")})
@@ -43,8 +44,8 @@
 (defn create-account-action [request]
   (when-valid-form request (create-account-form)
    (fn [values]
-     (let [{:keys [email password]} values]
-       (user/create-account email password)
+     (let [{:keys [name email password]} values]
+       (user/create-account name email password)
        (redirect (url "/")))))) ;;TODO add redirect to correct url
 
 (defn- validate-login-password [{:keys [email password]}]

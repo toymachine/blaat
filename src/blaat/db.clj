@@ -7,7 +7,7 @@
 
 (def tempid d/tempid)
 
-(defn connect []
+(defn- connect []
  (d/connect *db-uri*))
 
 
@@ -15,7 +15,7 @@
 
 (def ^:dynamic *basis-ts* nil) ;list of db-after basis-t's for this requests transactions
 
-(defn current []
+(defn- current []
   (or *current-db* (d/db (connect))))
 
 (defn q [qry & inputs]
@@ -88,6 +88,14 @@
                              :db/cardinality :db.cardinality/one
                              :db/doc "An accounts encrypted password"
                              :db.install/_attribute :db.part/db}
+
+                            {:db/id (d/tempid :db.part/db)
+                             :db/ident :user/name
+                             :db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one
+                             :db/doc "An users full name"
+                             :db.install/_attribute :db.part/db}
+
                             ])
     (System/exit 0)))
 

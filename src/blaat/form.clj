@@ -16,7 +16,7 @@
        (when-let [data (cache-get flash-id)]
          [(get-in data [:form :values]) (get-in data [:form :problems])]))]
 
-    (merge form {:value values
+    (merge form {:values values
                  :problems problems})))
 
 (defn when-valid-form [request form valid-response-fn]
