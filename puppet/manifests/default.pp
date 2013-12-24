@@ -107,7 +107,7 @@ service { "datomic/service":
     group => $user,
     path => ["/home/$user/bin", "/bin", "/usr/bin", "/usr/local/bin"],
     environment => [ "HOME=/home/vagrant" ],
-  command => "sleep 30 && lein run -m blaat.db/create-db",
+  command => "lein run -m blaat.db/create-db 2>&1 > create-db.log",
   require => [Exec['leiningen/install'], Service['datomic/service']]
 }
 

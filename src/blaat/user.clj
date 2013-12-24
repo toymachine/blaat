@@ -23,12 +23,24 @@
             [(< (cnt #(Character/isDigit %)) 1) (_t "Password must contain at least 1 digit")]]]
     (first (for [[x y] validations :when x] y)))) ;return the first failed validation
 
+(defn ex-data* [ex]
+  (if-let [data (ex-data ex)]
+    data
+    ;;else check cause
+    (when-let [cause (.getCause ex)]
+      (ex-data* cause))))
+
 (defn create-account [email password]
   ;;TODO validate email and password, catch unique email exception?
-  (let [user-id (db/tempid :db.part/user)
-        result  (db/transact [{:db/id user-id :account/email email}
-                              {:db/id user-id :account/password (crypt/encrypt password)}])]
-    result))
+  (if-let [msg (validate-password password)]
+    (throw (ex-info (_t "Account creation failed, invalid pasword") {})))
+  (let [user-id (db/tempid :db.part/user)]
+    (try
+      (db/transact [{:db/id user-id :account/email email}
+                    {:db/id user-id :account/password (crypt/encrypt password)}])
+
+      (catch Exception ex
+        (throw (ex-info (_t "Account creation failed") (ex-data* ex)))))))
 
 (defn get-user-id-by-email-and-password [email password]
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"

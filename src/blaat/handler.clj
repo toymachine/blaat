@@ -36,13 +36,13 @@
     (main-response :title (_t "Create account") :content (render-form form))))
 
 (defn create-account-action [request]
-  (validate-form request (create-account-form)
+  (when-valid-form request (create-account-form)
    (fn [values]
      (let [{:keys [email password]} values]
        (user/create-account email password) ;;TODO handle error about duplicate email and sync db
        (redirect (url "/")))))) ;;TODO add redirect to correct url
 
-(defn- validate-password [{:keys [email password]}]
+(defn- validate-login-password [{:keys [email password]}]
   (when (and (seq email) (seq password))
     (when-not (user/get-user-id-by-email-and-password email password)
       {:keys [:email :password] :msg (_t "Invalid email or password")})))
@@ -53,7 +53,7 @@
    :fields [{:name :email :type :email}
             {:name :password :type :password}]
    :validations [[:required [:email :password] (_t "Please enter both email and password")]]
-   :validator validate-password
+   :validator validate-login-password
    :submit-label (_t "Log in")})
 
 (defn login [request]
@@ -61,7 +61,7 @@
     (main-response :title (_t "Log in") :content (render-form form))))
 
 (defn login-action [request]
-  (validate-form request (login-form)
+  (when-valid-form request (login-form)
     (fn [values]
       (let [{:keys [email password]} values
             user-id (user/get-user-id-by-email-and-password email password)]
