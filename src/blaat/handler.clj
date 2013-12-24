@@ -31,7 +31,7 @@
    :fields [{:name :name :type :text}
             {:name :email :type :email}
             {:name :password :type :password}]
-   :validations [[:required [:name :email :password] (_t "Please provide a name, email address and password")]
+   :validations [[:required [:name :email :password] (_t "These fields are required")]
                  [:email [:email] (_t "Please provide a valid email address")]]
    :validator validate-create-account-form
    :submit-label (_t "Create account")})
