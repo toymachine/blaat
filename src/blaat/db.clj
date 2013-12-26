@@ -72,8 +72,7 @@
     (swap! *basis-ts* conj basis-t)
     result))
 
-(defn create-db []
-  (when (d/create-database *db-uri*)
+(defn update-schema []
     (d/transact (connect) [{:db/id (d/tempid :db.part/db)
                              :db/ident :account/email
                              :db/unique :db.unique/value
@@ -90,20 +89,41 @@
                              :db.install/_attribute :db.part/db}
 
                             {:db/id (d/tempid :db.part/db)
+                             :db/ident :account/created-at
+                             :db/valueType :db.type/instant
+                             :db/cardinality :db.cardinality/one
+                             :db/doc "When the account was created"
+                             :db.install/_attribute :db.part/db}
+
+                            {:db/id (d/tempid :db.part/db)
                              :db/ident :user/name
                              :db/valueType :db.type/string
                              :db/cardinality :db.cardinality/one
                              :db/doc "An users full name"
                              :db.install/_attribute :db.part/db}
 
-                            ])
-    (System/exit 0)))
+                            {:db/id (d/tempid :db.part/db)
+                             :db/ident :user/state
+                             :db/valueType :db.type/keyword
+                             :db/cardinality :db.cardinality/one
+                             :db/doc "An users state, normal user is :active, :pending is awaiting verification"
+                             :db.install/_attribute :db.part/db}
 
-(defn delete-db []
+                            ]))
+
+(defn- recreate-db []
   (d/delete-database *db-uri*)
+  (d/create-database *db-uri*)
+  (update-schema))
+
+(defn create-db []
+  (recreate-db)
   (System/exit 0))
 
+
 (comment
+
+  (recreate-db)
 
   (make-db)
 

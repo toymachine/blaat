@@ -1,8 +1,10 @@
 (ns blaat.user
   (:require [blaat.db :as db]
             [clj-bcrypt-wrapper.core :as crypt]
-            [blaat.validate :as v])
-  (:use [blaat.i18n]))
+            [blaat.validate :as v]
+            [blaat.mail :as mail])
+  (:use [blaat.i18n]
+        [blaat.util]))
 
 
 (def ^:dynamic *logged-in-user* nil)
@@ -21,6 +23,9 @@
     (when-let [cause (.getCause ex)]
       (recur cause))))
 
+(defn rethrow-ex [ex msg]
+   (throw (ex-info msg (ex-data* ex))))
+
 (defn create-account [name email password]
   "creates an account with given name, email (pk) and password"
   (when-not (seq name)
@@ -33,11 +38,16 @@
   (let [user-id (db/tempid :db.part/user)]
     (try
       (db/transact [{:db/id user-id :user/name name}
+                    {:db/id user-id :user/state :pending}
                     {:db/id user-id :account/email email}
-                    {:db/id user-id :account/password (crypt/encrypt password)}])
+                    {:db/id user-id :account/password (crypt/encrypt password)}
+                    {:db/id user-id :account/created-at (now)}
+                   ])
+      (mail/send-message :to email
+                         :subject (_t "Please verify to enable your account")
+                         :body (_t "Please verify to enable your account"))
       (catch Exception ex
-        (do
-          (throw (ex-info (_t "Account creation failed") (ex-data* ex))))))))
+        (rethrow-ex ex (_t "Account creation failed"))))))
 
 (defn get-user-id-by-email-and-password [email password]
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"

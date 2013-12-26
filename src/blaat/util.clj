@@ -5,7 +5,12 @@
 (defn rand-string [n]
     (apply str (repeatedly n #(rand-nth alphabet))))
 
+(defn now []
+  (java.util.Date.))
+
 (comment
+
+  (now)
 
   (apply str (take 10 (repeatedly (rand-nth chars))))
 
