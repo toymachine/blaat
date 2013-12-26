@@ -20,7 +20,8 @@
          [formative "0.8.7"]
          [clj-bcrypt-wrapper "0.1.0"]
 				 [http-kit "2.1.13"]
-				 [criterium "0.4.2"]]
+				 [criterium "0.4.2"]
+         [com.draines/postal "1.11.1"]]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler blaat.app/blaat-app}
   :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]
