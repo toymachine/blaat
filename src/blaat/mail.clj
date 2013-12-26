@@ -1,5 +1,6 @@
 (ns blaat.mail
- (:require [postal.core :as p]))
+  (:require [postal.core :as p])
+  (:use [clojure.core.async :only [go]]))
 
 
 (def aws_smtp_user "AKIAIXQHG6G37IOWE4OQ")
@@ -9,12 +10,13 @@
                                                          to "henkpunt@gmail.com"
                                                          subject ""
                                                          body ""}}]
+  (go
     (p/send-message ^{:user aws_smtp_user
                       :pass aws_smtp_password
                       :host "email-smtp.us-east-1.amazonaws.com"
                       :port 587}
                  {:from "henkpunt@gmail.com" :to "henkpunt@gmail.com" ;;TODO use actual from to
-                  :subject subject :body body}))
+                  :subject subject :body body})))
 
 
 (comment
@@ -27,8 +29,9 @@
                   :subject "Test from Amazon SES" :body "Test!!!2"})
 
 
-        (send-message :subject "Please verify to enable your account"
-                      :body "Please verify to enable your account")
+
+      (send-message :subject "Please verify to enable your account"
+                    :body "Please verify to enable your account")
 
 
   )

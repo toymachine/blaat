@@ -9,6 +9,7 @@
          [org.clojure/clojurescript "0.0-2030"]
          [org.clojure/tools.logging "0.2.6"]
 				 [org.clojure/data.json "0.2.3"]
+         [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
          [ring/ring-core "1.2.1"]
          [ring/ring-devel "1.2.1"]
          [ring-anti-forgery "0.3.0"]
