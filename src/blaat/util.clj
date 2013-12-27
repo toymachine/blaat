@@ -8,7 +8,20 @@
 (defn now []
   (java.util.Date.))
 
+(defn encode-base64
+  ([data]
+    (org.apache.commons.codec.binary.Base64/encodeBase64URLSafeString data)))
+
+(defn hmac-sha1 [key message]
+  (let [key-spec (javax.crypto.spec.SecretKeySpec. (.getBytes key) "HmacSHA1")
+        mac (javax.crypto.Mac/getInstance "HmacSHA1")]
+        (.init mac key-spec)
+    (let [raw-hmac (.doFinal mac (.getBytes message))]
+      raw-hmac)))
+
 (comment
+
+  (encode-base64 (hmac-sha1 "abcdefg" "blaataap3"))
 
   (now)
 
