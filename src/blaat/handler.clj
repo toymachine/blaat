@@ -3,6 +3,8 @@
             [blaat.util :as util]
             [blaat.user :as user]
             [blaat.validate :as v]
+            [blaat.secret :as secret]
+            [blaat.url :as url]
             [formative.core :as f]
             [formative.parse :as fp]
             )
@@ -88,6 +90,10 @@
 (defn logout-action [request]
   (-> (redirect (url "/"))
       (assoc :session {}))) ;clear session, which contained the logged-in user-id
+
+(defn validate-email [request]
+  (prn (:params request))
+  (prn (url/valid-params? secret/email-validation (:params request))))
 
 (defn index [request]
   (main-response :title (_t "Main") :content "Main Content"))

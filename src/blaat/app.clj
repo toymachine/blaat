@@ -55,6 +55,7 @@
                   :post handler/login-action}
        ["logout"] {:get handler/logout
                    :post handler/logout-action}
+       ["validate-email"] {:get handler/validate-email}
        ["register"] {:get handler/create-account
                      :post handler/create-account-action}
      ))
