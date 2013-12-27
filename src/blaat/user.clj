@@ -2,9 +2,12 @@
   (:require [blaat.db :as db]
             [clj-bcrypt-wrapper.core :as crypt]
             [blaat.validate :as v]
-            [blaat.mail :as mail])
-  (:use [blaat.i18n]
-        [blaat.util]))
+            [blaat.mail :as mail]
+            [blaat.url :as url]
+            [blaat.secret :as secret]
+            [clj-time.core :as dt])
+  (:use [blaat.i18n :only [_t]]))
+
 
 
 (def ^:dynamic *logged-in-user* nil)
@@ -26,7 +29,15 @@
 (defn rethrow-ex [ex msg]
    (throw (ex-info msg (ex-data* ex))))
 
-(defn create-account [name email password]
+(defn- send-email-validation-mail [user-id user-email]
+   (let [email-validation-url
+          (url/absolute-url "/validate-email"
+          (url/query-str {:user-id user-id} secret/email-validation (-> 15 dt/minutes dt/from-now)))]
+    (mail/send-message :to user-email
+                       :subject (_t "Please verify to enable your account")
+                       :body (str (_t "Please click the following link to verify your account: ") email-validation-url))))
+
+ (defn create-account [name email password]
   "creates an account with given name, email (pk) and password"
   (when-not (seq name)
     (throw (ex-info (_t "Account creation failed, no name given"))))
@@ -35,17 +46,19 @@
   (when-let [msg (v/validate-email email)]
     (throw (ex-info (_t "Account creation failed, invalid email") {:msg msg})))
 
-  (let [user-id (db/tempid :db.part/user)]
+  (let [tmp-user-id (db/tempid :db.part/user)]
     (try
-      (db/transact [{:db/id user-id :user/name name}
-                    {:db/id user-id :user/state :pending}
-                    {:db/id user-id :account/email email}
-                    {:db/id user-id :account/password (crypt/encrypt password)}
-                    {:db/id user-id :account/created-at (now)}
-                   ])
-      (mail/send-message :to email
-                         :subject (_t "Please verify to enable your account")
-                         :body (_t "Please verify to enable your account"))
+      (let [tx-result
+        (db/transact [{:db/id tmp-user-id :user/name name}
+                      {:db/id tmp-user-id :user/state :pending}
+                      {:db/id tmp-user-id :account/email email}
+                      {:db/id tmp-user-id :account/password (crypt/encrypt password)}
+                      {:db/id tmp-user-id :account/created-at (now)}
+                     ])
+            user-id (get-in tx-result [:tempids tmp-user-id])]
+
+           (when user-id (send-email-validation-mail user-id email)))
+
       (catch Exception ex
         (rethrow-ex ex (_t "Account creation failed"))))))
 
@@ -110,11 +123,8 @@
 
   (logged-in-user?)
 
-  (db/q '[:find ?e
-          :in $ ?user-id
-          :where [?e db/id ?user-id]] 12345)
 
-  (crypt/compare "123457" (crypt/encrypt "123456"))
+  (send-email-validation-mail 12345 "henkpunt@gmail.com")
 
   (boolean "piet")
 

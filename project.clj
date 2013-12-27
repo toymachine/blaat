@@ -20,6 +20,7 @@
          [net.cgrand/moustache "1.2.0-alpha2"]
          [formative "0.8.7"]
          [clj-bcrypt-wrapper "0.1.0"]
+         [clj-time "0.6.0"]
 				 [http-kit "2.1.13"]
 				 [criterium "0.4.2"]
          [com.draines/postal "1.11.1"]]

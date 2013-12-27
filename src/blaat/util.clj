@@ -5,9 +5,6 @@
 (defn rand-string [n]
     (apply str (repeatedly n #(rand-nth alphabet))))
 
-(defn now []
-  (java.util.Date.))
-
 (defn encode-base64
   ([data]
     (org.apache.commons.codec.binary.Base64/encodeBase64URLSafeString data)))
@@ -22,8 +19,6 @@
 (comment
 
   (encode-base64 (hmac-sha1 "abcdefg" "blaataap3"))
-
-  (now)
 
   (apply str (take 10 (repeatedly (rand-nth chars))))
 
