@@ -19,25 +19,15 @@
   (boolean (logged-in-user)))
 
 
-(defn ex-data* [ex]
- (if-let [data (ex-data ex)]
-    data
-    ;;else recurse/check cause
-    (when-let [cause (.getCause ex)]
-      (recur cause))))
-
-(defn rethrow-ex [ex msg]
-   (throw (ex-info msg (ex-data* ex))))
-
 (defn- send-email-validation-mail [user-id user-email]
    (let [email-validation-url
-          (url/absolute-url "/validate-email"
+          (url/absolute-url "/validate-account"
           (url/query-str {:user-id user-id} secret/email-validation (-> 15 dt/minutes dt/from-now)))]
     (mail/send-message :to user-email
                        :subject (_t "Please verify to enable your account")
                        :body (str (_t "Please click the following link to verify your account: ") email-validation-url))))
 
- (defn create-account [name email password]
+(defn create-account [name email password]
   "creates an account with given name, email (pk) and password"
   (when-not (seq name)
     (throw (ex-info (_t "Account creation failed, no name given"))))
@@ -46,21 +36,26 @@
   (when-let [msg (v/validate-email email)]
     (throw (ex-info (_t "Account creation failed, invalid email") {:msg msg})))
 
-  (let [tmp-user-id (db/tempid :db.part/user)]
-    (try
-      (let [tx-result
-        (db/transact [{:db/id tmp-user-id :user/name name}
-                      {:db/id tmp-user-id :user/state :pending}
-                      {:db/id tmp-user-id :account/email email}
-                      {:db/id tmp-user-id :account/password (crypt/encrypt password)}
-                      {:db/id tmp-user-id :account/created-at (now)}
-                     ])
-            user-id (get-in tx-result [:tempids tmp-user-id])]
+  (let [tmp-user-id (db/tempid :db.part/user)
+        tx-result
+              (db/transact [{:db/id tmp-user-id :user/name name}
+                            {:db/id tmp-user-id :account/state :pending}
+                            {:db/id tmp-user-id :account/email email}
+                            {:db/id tmp-user-id :account/password (crypt/encrypt password)}
+                            {:db/id tmp-user-id :account/created-at (java.util.Date.)}])
 
-           (when user-id (send-email-validation-mail user-id email)))
+        user-id (db/resolve-tempid tx-result tmp-user-id)]
 
-      (catch Exception ex
-        (rethrow-ex ex (_t "Account creation failed"))))))
+       (when user-id (send-email-validation-mail user-id email))
+
+        user-id))
+
+(defn validate-account [user-id]
+  (when-not (number? user-id)
+    (throw (ex-info (_t "Validate account failed, no user-id given")))
+
+  (db/transact [{:db/id user-id :account/state :active}])))
+
 
 (defn get-user-id-by-email-and-password [email password]
   "returns user-id when account with email exists and given plaintext password is correct otherwise nil"
@@ -123,6 +118,9 @@
 
   (logged-in-user?)
 
+  (create-account "Harry" "harrsdsfdx4fas5fb@potter.nl" "P4fadsf")
+
+   (number? nil)
 
   (send-email-validation-mail 12345 "henkpunt@gmail.com")
 

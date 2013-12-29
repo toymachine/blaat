@@ -91,7 +91,7 @@
   (-> (redirect (url "/"))
       (assoc :session {}))) ;clear session, which contained the logged-in user-id
 
-(defn validate-email [request]
+(defn validate-account [request]
   (prn (:params request))
   (prn (url/valid-params? secret/email-validation (:params request))))
 

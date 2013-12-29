@@ -13,7 +13,7 @@
 
 (def ^:dynamic *current-db* nil)
 
-(def ^:dynamic *basis-ts* nil) ;list of db-after basis-t's for this requests transactions
+(def ^:dynamic *basis-ts* (atom [])) ;list of db-after basis-t's for this requests transactions
 
 (defn- current []
   (or *current-db* (d/db (connect))))
@@ -72,6 +72,10 @@
     (swap! *basis-ts* conj basis-t)
     result))
 
+(defn resolve-tempid [tx-result tempid]
+  (let [{:keys [tempids db-after]} tx-result]
+    (d/resolve-tempid db-after tempids tempid)))
+
 (defn update-schema []
     (d/transact (connect) [{:db/id (d/tempid :db.part/db)
                              :db/ident :account/email
@@ -89,6 +93,13 @@
                              :db.install/_attribute :db.part/db}
 
                             {:db/id (d/tempid :db.part/db)
+                             :db/ident :account/state
+                             :db/valueType :db.type/keyword
+                             :db/cardinality :db.cardinality/one
+                             :db/doc "An accounts state, normal user is :active, :pending is awaiting verification"
+                             :db.install/_attribute :db.part/db}
+
+                           {:db/id (d/tempid :db.part/db)
                              :db/ident :account/created-at
                              :db/valueType :db.type/instant
                              :db/cardinality :db.cardinality/one
@@ -102,12 +113,6 @@
                              :db/doc "An users full name"
                              :db.install/_attribute :db.part/db}
 
-                            {:db/id (d/tempid :db.part/db)
-                             :db/ident :user/state
-                             :db/valueType :db.type/keyword
-                             :db/cardinality :db.cardinality/one
-                             :db/doc "An users state, normal user is :active, :pending is awaiting verification"
-                             :db.install/_attribute :db.part/db}
 
                             ]))
 
