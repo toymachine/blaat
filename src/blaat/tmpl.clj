@@ -26,18 +26,21 @@
            [:li [:a {:href "#"} "Contact"]]]
 
            [:ul.nav.navbar-nav.navbar-right
+             (when-not logged-in-user?
+               [:li [:a {:href "/register"} "Join"]])
+
              (if logged-in-user?
                 [:li.dropdown
                    [:a.dropdown-toggle {:href "#" :data-toggle "dropdown"} user-name [:b.caret]]
                    [:ul.dropdown-menu
                      [:li [:a {:href (url "/account")} (_t "Account")]]
                      [:li.divider]
-                     [:li [:a {:href (url "/logout")} (_t "Log out")]]
+                     [:li [:a {:href (url "/logout")} (_t "Sign out")]]
 
                     ]
                  ]
                ;;else
-                 [:li [:a {:href (url "/login")} (_t "Log in")]])
+                 [:li [:a {:href (url "/login")} (_t "Sign in")]])
             ]
 
         ]]])
