@@ -1,6 +1,7 @@
 (ns blaat.response
   (:use [blaat.cache]
-        [blaat.url])
+        [blaat.url]
+        [blaat.i18n])
   (:require [blaat.util :as util]
             [ring.util.response :as ring-response]))
 
@@ -10,10 +11,15 @@
    :headers {"Content-type" "text/html"}
    :body body})
 
-(defn flash [response data]
-  (let [flash-id (util/rand-string 16)]
-    (cache-set! flash-id data)
-    (assoc response :flash flash-id)))
-
 (defn redirect [uri]
   (ring-response/redirect uri))
+
+(defn security-error []
+  (throw (ex-info (_t "Security Error") {})))
+
+
+(comment
+
+  (security-error)
+
+  )

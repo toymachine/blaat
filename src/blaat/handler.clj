@@ -2,6 +2,7 @@
   (:require [blaat.tmpl :as tmpl]
             [blaat.util :as util]
             [blaat.user :as user]
+            [blaat.flash :as flash]
             [blaat.validate :as v]
             [blaat.secret :as secret]
             [blaat.url :as url]
@@ -14,11 +15,14 @@
         [blaat.form]
         [blaat.response]))
 
-(defn main-response [& {:keys [title content script]}]
-  (response
-    :body (tmpl/main :title title :content content :script script
-                     :logged-in-user? (user/logged-in-user?)
-                     :user-name (user/user-name (user/logged-in-user)))))
+(defn main-response [request & {:keys [title content script]}]
+  (let [flash-data (flash/get-data request)]
+    (response
+      :body (tmpl/main :title title :content content :script script
+                       :logged-in-user? (user/logged-in-user?)
+                       :user-name (user/user-name (user/logged-in-user))
+                       :success (:success flash-data)
+                       :error (:error flash-data)))))
 
 (defn- validate-create-account-form [{:keys [email password]}]
   (if (user/get-user-by-email email)
@@ -41,7 +45,7 @@
 ;;TODO make sure not logged in
 (defn create-account [request]
   (let [form (load-form request (create-account-form))]
-    (main-response :title (_t "Create account") :content (render-form form))))
+    (main-response request :title (_t "Create account") :content (render-form form))))
 
 (defn create-account-action [request]
   (when-valid-form request (create-account-form)
@@ -66,7 +70,7 @@
 
 (defn login [request]
   (let [form (load-form request (login-form))]
-    (main-response :title (_t "Log in") :content (render-form form))))
+    (main-response request :title (_t "Log in") :content (render-form form))))
 
 (defn login-action [request]
   (when-valid-form request (login-form)
@@ -85,18 +89,22 @@
   "bumper page that shows a logout button. the button is pressed automatically when javascript is enabled.
   this lets us use POST for the actual logout preventing CSRF"
   (let [script "$(function() { $('#logout-form #field-submit').click(); });"]
-    (main-response :title (_t "Log out") :content (render-form (logout-form)) :script script)))
+    (main-response request :title (_t "Log out") :content (render-form (logout-form)) :script script)))
 
 (defn logout-action [request]
   (-> (redirect (url "/"))
       (assoc :session {}))) ;clear session, which contained the logged-in user-id
 
 (defn validate-account [request]
-  (prn (:params request))
-  (prn (url/valid-params? secret/email-validation (:params request))))
+  (let [params (:params request)]
+    (if (url/valid-params? secret/email-validation params)
+      (-> (redirect (url "/login"))
+          (flash/success (_t "Your account was validated succesfully, you can now login.")))
+      ;;else
+      (security-error))))
 
 (defn index [request]
-  (main-response :title (_t "Main") :content "Main Content"))
+  (main-response request :title (_t "Main") :content "Main Content"))
 
 (comment
 

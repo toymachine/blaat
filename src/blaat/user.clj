@@ -118,7 +118,8 @@
 
   (logged-in-user?)
 
-  (create-account "Harry" "harrsdsfdx4fas5fb@potter.nl" "P4fadsf")
+  (validate-account (create-account "Harry" "harrfdsfdx4fas89fb@potter.nl" "P4fadsf"))
+
 
    (number? nil)
 
