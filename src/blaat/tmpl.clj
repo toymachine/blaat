@@ -21,8 +21,9 @@
        [:div {:class "collapse navbar-collapse"}
          [:ul {:class "nav navbar-nav"}
 
-           [:li {:class "active"}
-                [:a {:href "/"} "Home"]]]
+         ;;  [:li {:class "active"}
+         ;;       [:a {:href "/"} "Home"]]
+          ]
 
          [:ul.nav.navbar-nav.navbar-right
            (when-not logged-in-user?
