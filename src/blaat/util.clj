@@ -1,6 +1,6 @@
 (ns blaat.util)
 
-(def alphabet (map char (concat (range 48 58) (range 66 92) (range 97 123))))
+(def alphabet (map char (concat (range 48 58) (range 65 91) (range 97 123))))
 
 (defn rand-string [n]
     (apply str (repeatedly n #(rand-nth alphabet))))
