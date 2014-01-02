@@ -12,7 +12,7 @@
      (cache-get flash-id)))
 
 (defn form [response form]
-  (data response {:form form}))
+  (set-data response {:form form}))
 
 (defn success [response & msgs]
-  (data response {:success msgs}))
+  (set-data response {:success msgs}))
