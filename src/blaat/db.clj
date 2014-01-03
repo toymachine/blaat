@@ -107,6 +107,25 @@
                              :db.install/_attribute :db.part/db}
 
                             {:db/id (d/tempid :db.part/db)
+                             :db/ident :account/persistent-cookies
+                             :db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one
+                             :db/noHistory true
+                             :db/doc "Random numbers used by persistent cookie implementation"
+                             :db.install/_attribute :db.part/db}
+
+                            {:db/id (d/tempid :db.part/db)
+                             :db/ident :assoc
+                             :db/doc "DB func to update p cookies"
+                             :db/fn (d/function '{:lang "clojure"
+                                                  :params [db e p k v]
+                                                  :requires [[datomic.api :as d]]
+                                                  :code (let [current-map (read-string (or (get (d/entity db e) p) "{}"))
+                                                              new-map (assoc current-map k v)]
+\                                                          [{:db/id e p (pr-str new-map)}]
+                                                          )})}
+
+                            {:db/id (d/tempid :db.part/db)
                              :db/ident :user/name
                              :db/valueType :db.type/string
                              :db/cardinality :db.cardinality/one
@@ -128,9 +147,17 @@
 
 (comment
 
+  (pr-str {})
+
+  (transact [[:update-persistent-cookies 888]])
+
+  (assoc nil :piet "asao")
+
   (recreate-db)
 
   (make-db)
+
+  (read-string nil)
 
   (apply max [1 2 3 4])
 
